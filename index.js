@@ -58,40 +58,37 @@ client.once(Events.ClientReady, () => { console.log('Bot turned on'); });
 client.on(Events.MessageCreate, async (message) => {
     if (message.author.bot) return;
 
+    const replyAuthorUsername = message.author.username;
     const channel = message.channel;
+    let anonEmbed;
+    let logEmbed;
+
     const r = Math.floor(Math.random() * 100000);
     const d = new Date();
     const messageStamp = '#' + r + ' ' + d.toLocaleDateString();
 
     if (channel.id !== anonymousChannel) return;
-    if (roleName && message.member.roles.cache.some((role) => role.name === roleName)) return; // admin can't send anonymous messages
-    await channelMessage(channel, message, messageStamp);
-});
+    if (roleName && message.member.roles.cache.some((role) => role.name === roleName)) return; // role blacklist
 
-async function channelMessage(channel, message, messageStamp) {
-    const replyAuthorUsername = message.author.username;
-    let anonEmbed;
-    let logEmbed;
+    try {
+        anonEmbed = new EmbedBuilder()
+            // .setColor('#117557ff')
+            // .setTitle('Anonymous Message')
+            
+            .setAuthor({ name: getAvatar(replyAuthorUsername) })
+            .setDescription(String(message.content))
+            // .addField('Stamp', messageStamp, true)
 
-        try {
-            anonEmbed = new EmbedBuilder()
-                // .setColor('#117557ff')
-                // .setTitle('Anonymous Message')
-                
-                .setAuthor({ name: getAvatar(replyAuthorUsername) })
-                .setDescription(String(message.content))
-                // .addField('Stamp', messageStamp, true)
+            .setTimestamp()
 
-                .setTimestamp()
-
-            channel.send({
-                // content: '```\n' + getAvatar(replyAuthorUsername) + '\n ' + messageStamp + '```\n' + message.content,
-                // files: message.attachments.map((a) => a.url),
-                embeds: [anonEmbed]
-            });
-        } catch (error) {
-            console.error(error);
-        }
+        channel.send({
+            // content: '```\n' + getAvatar(replyAuthorUsername) + '\n ' + messageStamp + '```\n' + message.content,
+            // files: message.attachments.map((a) => a.url),
+            embeds: [anonEmbed]
+        });
+    } catch (error) {
+        console.error(error);
+    }
 
     if(modChannel) {
         logEmbed = new EmbedBuilder()
@@ -118,7 +115,6 @@ async function channelMessage(channel, message, messageStamp) {
     } catch(error){
         console.error('Error deleting message:', error.message);
     }
-
-}
+});
 
 client.login(token);
