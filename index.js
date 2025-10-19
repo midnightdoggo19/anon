@@ -8,14 +8,17 @@ const {
 } = require('discord.js');
 const crypto = require('crypto');
 
-const anonymousChannel = process.env.ANONYMOUS_CHANNEL;
+const anonymousChannelID = process.env.ANONYMOUS_CHANNEL;
 const roleName = process.env.ROLE_NAME;
-const modChannel = process.env.MOD_CHANNEL;
+const modChannelID = process.env.MOD_CHANNEL;
 const token = process.env.DISCORD_TOKEN;
+let inputChannelID = process.env.INPUT_CHANNEL; // cuz it can change
 
-if (!anonymousChannel || !token) {
+if (!anonymousChannelID || !token) {
     console.log('Please set all required environment variables!');
     process.exit(1);
+} if (!inputChannelID) {
+    inputChannelID = anonymousChannelID // down here
 }
 
 let client = new Client({
@@ -58,8 +61,11 @@ client.once(Events.ClientReady, () => { console.log('Bot turned on'); });
 client.on(Events.MessageCreate, async (message) => {
     if (message.author.bot) return;
 
-    const replyAuthorUsername = message.author.username;
     const channel = message.channel;
+    const anonymousChannel = await client.channels.fetch(anonymousChannelID);
+    const modChannel = await client.channels.fetch(modChannelID);
+    
+    const replyAuthorUsername = message.author.username;
     let anonEmbed;
     let logEmbed;
 
@@ -67,7 +73,7 @@ client.on(Events.MessageCreate, async (message) => {
     const d = new Date();
     const messageStamp = '#' + r + ' ' + d.toLocaleDateString();
 
-    if (channel.id !== anonymousChannel) return;
+    if (channel.id !== inputChannelID) return;
     if (roleName && message.member.roles.cache.some((role) => role.name === roleName)) return; // role blacklist
 
     try {
@@ -81,7 +87,7 @@ client.on(Events.MessageCreate, async (message) => {
 
             .setTimestamp()
 
-        channel.send({
+        anonymousChannel.send({
             // content: '```\n' + getAvatar(replyAuthorUsername) + '\n ' + messageStamp + '```\n' + message.content,
             // files: message.attachments.map((a) => a.url),
             embeds: [anonEmbed]
@@ -100,13 +106,11 @@ client.on(Events.MessageCreate, async (message) => {
             // .addField('Stamp', messageStamp, true)
 
             .setTimestamp()
-        
-        client.channels.fetch(modChannel).then((modChannel) => {
-            modChannel.send({
-                // content: '```\n' + replyAuthorUsername + '\n ' + messageStamp + '```\n' + message.content + replyInfo,
-                // files: message.attachments.map((a) => a.url),
-                embeds: [logEmbed]
-            });
+
+        modChannel.send({
+            // content: '```\n' + replyAuthorUsername + '\n ' + messageStamp + '```\n' + message.content + replyInfo,
+            // files: message.attachments.map((a) => a.url),
+            embeds: [logEmbed]
         });
     }
 
