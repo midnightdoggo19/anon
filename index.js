@@ -4,9 +4,9 @@ const {
     GatewayIntentBits,
     Events,
     Partials,
-    MessageEmbed
+    EmbedBuilder
 } = require('discord.js');
-const getAvatar = require('./avatar');
+const crypto = require('crypto');
 
 const anonymousChannel = process.env.ANONYMOUS_CHANNEL;
 const roleName = process.env.ROLE_NAME;
@@ -14,7 +14,7 @@ const modChannel = process.env.MOD_CHANNEL;
 const token = process.env.DISCORD_TOKEN;
 
 if (!anonymousChannel || !token) {
-    console.log("Please set all required environment variables");
+    console.log('Please set all required environment variables!');
     process.exit(1);
 }
 
@@ -32,6 +32,27 @@ let client = new Client({
     ] // for DM permissions
 })
 
+const emojis = [
+    '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯',
+    '🦁', '🐮', '🐷', '🐸', '🐵', '🐔', '🐧', '🐦', '🐤', '🐣',
+    '🐥', '🦆', '🦅', '🦉', '🦇', '🐺', '🐗', '🐴', '🦄', '🐝',
+    '🐛', '🦋', '🐌', '🐞', '🐜', '🦟', '🦗', '🕷️',  '🦂', '🐢',
+    '🐍', '🦎', '🦖', '🦕', '🐙', '🦑', '🦐', '🦞', '🦀', '🐚',
+    '🦈', '🐋', '🐳', '🐬', '🐡', '🌿', '🌱', '🌳', '🌴', '🌵',
+    '🌷', '🌹', '🌺', '🌻', '🌼', '🌸', '🌾', '🍀', '🍁', '🍄',
+    '🌰', '🌲', '🐊', '🦢', '⚡️', '🔥', '💧', '🐟', '🐠', '🦌',
+    '🐽', '🌪️',  '🌊', '🌬️',  '☀️',  '⛅', '🌈', '⚡', '❄️',  '💨',
+    '🌁', '🌤️',  '🌥️',  '🌦️',  '🌧️',  '⛈️',  '🌩️',  '🌨️',  '🌫️',  '☁️',
+    '🌋', '🌍', '🌎', '🌏', '🪨', '🍂', '🍃'
+];
+
+function getAvatar (str) {
+    const d = new Date();
+    const hashPwd = crypto.createHash('sha1').update(str + d.getDate()).digest('hex');
+    const i = parseInt('0x' + hashPwd) % emojis.length;
+    return emojis[i];
+}
+
 client.once(Events.ClientReady, () => { console.log('Bot turned on'); });
 
 client.on(Events.MessageCreate, async (message) => {
@@ -40,80 +61,62 @@ client.on(Events.MessageCreate, async (message) => {
     const channel = message.channel;
     const r = Math.floor(Math.random() * 100000);
     const d = new Date();
-    const messageStamp = "#" + r + " " + d.toLocaleDateString();
-
-    if (channel.type === 1) { //dm
-        dmMessage(message, messageStamp);
-        return;
-    }
+    const messageStamp = '#' + r + ' ' + d.toLocaleDateString();
 
     if (channel.id !== anonymousChannel) return;
     if (roleName && message.member.roles.cache.some((role) => role.name === roleName)) return; // admin can't send anonymous messages
     await channelMessage(channel, message, messageStamp);
 });
 
-function dmMessage(message, messageStamp) {
-    client.channels.fetch(anonymousChannel).then((channel) => {
-        channel.send({
-            content: "```\n" + getAvatar(message.author.username) + "\n " + messageStamp + "```\n" + message.content,
-            files: message.attachments.map(a => a.url)
-        });
-    })
-    if(!modChannel) return;
-    client.channels.fetch(modChannel).then((channel) => {
-        channel.send({
-            content: "```\n" + message.author.username + "\n " + messageStamp + "```\n" + message.content,
-            files: message.attachments.map(a => a.url)
-        });
-
-    })
-    return;
-}
-
 async function channelMessage(channel, message, messageStamp) {
-    const originalMessageId = message.reference?.messageId;
     const replyAuthorUsername = message.author.username;
-    let replyInfo = '';
-    let originalMessage;
+    let anonEmbed;
+    let logEmbed;
 
-    if (originalMessageId) {
         try {
-            originalMessage = await channel.messages.fetch(originalMessageId);
-            const originalAuthorUsername = originalMessage.author.username;
-            replyInfo = `\n\nReply to: @${originalAuthorUsername} (Message ID: ${originalMessageId})`;
-            originalMessage.reply({
-                content: "```\n" + getAvatar(replyAuthorUsername) + "\n " + messageStamp + "```\n" + message.content,
-                files: message.attachments.map((a) => a.url),
+            anonEmbed = new EmbedBuilder()
+                // .setColor('#117557ff')
+                // .setTitle('Anonymous Message')
+                
+                .setAuthor({ name: getAvatar(replyAuthorUsername) })
+                .setDescription(String(message.content))
+                // .addField('Stamp', messageStamp, true)
+
+                .setTimestamp()
+
+            channel.send({
+                // content: '```\n' + getAvatar(replyAuthorUsername) + '\n ' + messageStamp + '```\n' + message.content,
+                // files: message.attachments.map((a) => a.url),
+                embeds: [anonEmbed]
             });
         } catch (error) {
-            console.error('Error fetching original message:', error);
-            client.channels.fetch(anonymousChannel).then((anonymousChannel) => {
-                anonymousChannel.send({
-                    content: "```\n" + getAvatar(replyAuthorUsername) + "\n " + messageStamp + "```\n" + message.content,
-                    files: message.attachments.map((a) => a.url),
-                });
-            });
+            console.error(error);
         }
-    } else {
-        client.channels.fetch(anonymousChannel).then((anonymousChannel) => {
-            anonymousChannel.send({
-                content: "```\n" + getAvatar(replyAuthorUsername) + "\n " + messageStamp + "```\n" + message.content,
-                files: message.attachments.map((a) => a.url),
+
+    if(modChannel) {
+        logEmbed = new EmbedBuilder()
+            // .setColor('#117557ff')
+            // .setTitle('Anonymous Message')
+            
+            .setAuthor({ name: replyAuthorUsername })
+            .setDescription(String(message.content))
+            // .addField('Stamp', messageStamp, true)
+
+            .setTimestamp()
+        
+        client.channels.fetch(modChannel).then((modChannel) => {
+            modChannel.send({
+                // content: '```\n' + replyAuthorUsername + '\n ' + messageStamp + '```\n' + message.content + replyInfo,
+                // files: message.attachments.map((a) => a.url),
+                embeds: [logEmbed]
             });
         });
     }
-    if(!modChannel) return;
-    client.channels.fetch(modChannel).then((modChannel) => {
-        modChannel.send({
-            content: "```\n" + replyAuthorUsername + "\n " + messageStamp + "```\n" + message.content + replyInfo,
-            files: message.attachments.map((a) => a.url),
-        });
-    });
 
     try {
         message.delete();
     } catch(error){
-        console.error("Error deleting message:", error.message);
+        console.error('Error deleting message:', error.message);
     }
 
 }
