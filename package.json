@@ -1,12 +1,10 @@
 {
-  "name": "stealth-bot",
-  "version": "1.0.0",
-  "description": "Bot for anonymous chatting",
+  "name": "anon",
+  "version": "2.0.0",
+  "description": "Discord bot for anonymous chatting",
   "main": "index.js",
-  "type":"module",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "node index.js"
   },
   "engines": {
     "node": ">=16.9"
@@ -32,6 +30,10 @@
   "contributors": [
     {
       "name": "Nagaraj Pandith"
+    },
+    {
+      "name": "Midnight Doggo",
+      "email": "git@midnightdoggo19.com"
     }
   ]
 }

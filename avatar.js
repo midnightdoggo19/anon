@@ -1,4 +1,4 @@
-import crypto from "crypto"
+const crypto = require('crypto');
 let emojis = [
     '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯',
     '🦁', '🐮', '🐷', '🐸', '🐵', '🐔', '🐧', '🐦', '🐤', '🐣',
@@ -20,4 +20,4 @@ const getAvatar = (str) => {
     return emojis[i]
 }
 
-export default getAvatar
+module.exports = { emojis, getAvatar };

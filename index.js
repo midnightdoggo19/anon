@@ -1,27 +1,38 @@
-import express from "express";
-const app = express();
-import { config } from "dotenv";
-config();
-import { Client, GatewayIntentBits, Events, Partials } from "discord.js";
-import getAvatar from "./avatar.js";
+require('dotenv').config();
+const {
+    Client,
+    GatewayIntentBits,
+    Events,
+    Partials,
+    MessageEmbed
+} = require('discord.js');
+const getAvatar = require('./avatar');
 
-const anonymousChannel = process.env.ANONUMOUS_CHANNEL;
+const anonymousChannel = process.env.ANONYMOUS_CHANNEL;
 const roleName = process.env.ROLE_NAME;
 const modChannel = process.env.MOD_CHANNEL;
 const token = process.env.DISCORD_TOKEN;
+
 if (!anonymousChannel || !token) {
     console.log("Please set all required environment variables");
     process.exit(1);
 }
 
 let client = new Client({
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers, GatewayIntentBits.DirectMessages],
-    partials: [Partials.Channel, Partials.Message] // for DM permissions
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.DirectMessages
+    ],
+    partials: [
+        Partials.Channel,
+        Partials.Message
+    ] // for DM permissions
 })
 
-client.once(Events.ClientReady, () => {
-    console.log('Bot turned on');
-});
+client.once(Events.ClientReady, () => { console.log('Bot turned on'); });
 
 client.on(Events.MessageCreate, async (message) => {
     if (message.author.bot) return;
@@ -44,21 +55,20 @@ client.on(Events.MessageCreate, async (message) => {
 function dmMessage(message, messageStamp) {
     client.channels.fetch(anonymousChannel).then((channel) => {
         channel.send({
-            content: "```\n" + getAvatar(message.author.username) + "\n " + messageStamp + "```\n" + message.content + "\n\n--------------------",
+            content: "```\n" + getAvatar(message.author.username) + "\n " + messageStamp + "```\n" + message.content,
             files: message.attachments.map(a => a.url)
         });
     })
     if(!modChannel) return;
     client.channels.fetch(modChannel).then((channel) => {
         channel.send({
-            content: "```\n" + message.author.username + "\n " + messageStamp + "```\n" + message.content + "\n\n--------------------",
+            content: "```\n" + message.author.username + "\n " + messageStamp + "```\n" + message.content,
             files: message.attachments.map(a => a.url)
         });
 
     })
     return;
 }
-
 
 async function channelMessage(channel, message, messageStamp) {
     const originalMessageId = message.reference?.messageId;
@@ -72,14 +82,14 @@ async function channelMessage(channel, message, messageStamp) {
             const originalAuthorUsername = originalMessage.author.username;
             replyInfo = `\n\nReply to: @${originalAuthorUsername} (Message ID: ${originalMessageId})`;
             originalMessage.reply({
-                content: "```\n" + getAvatar(replyAuthorUsername) + "\n " + messageStamp + "```\n" + message.content+"\n\n--------------------",
+                content: "```\n" + getAvatar(replyAuthorUsername) + "\n " + messageStamp + "```\n" + message.content,
                 files: message.attachments.map((a) => a.url),
             });
         } catch (error) {
             console.error('Error fetching original message:', error);
             client.channels.fetch(anonymousChannel).then((anonymousChannel) => {
                 anonymousChannel.send({
-                    content: "```\n" + getAvatar(replyAuthorUsername) + "\n " + messageStamp + "```\n" + message.content+"\n\n--------------------",
+                    content: "```\n" + getAvatar(replyAuthorUsername) + "\n " + messageStamp + "```\n" + message.content,
                     files: message.attachments.map((a) => a.url),
                 });
             });
@@ -87,7 +97,7 @@ async function channelMessage(channel, message, messageStamp) {
     } else {
         client.channels.fetch(anonymousChannel).then((anonymousChannel) => {
             anonymousChannel.send({
-                content: "```\n" + getAvatar(replyAuthorUsername) + "\n " + messageStamp + "```\n" + message.content+"\n\n--------------------",
+                content: "```\n" + getAvatar(replyAuthorUsername) + "\n " + messageStamp + "```\n" + message.content,
                 files: message.attachments.map((a) => a.url),
             });
         });
@@ -95,24 +105,17 @@ async function channelMessage(channel, message, messageStamp) {
     if(!modChannel) return;
     client.channels.fetch(modChannel).then((modChannel) => {
         modChannel.send({
-            content: "```\n" + replyAuthorUsername + "\n " + messageStamp + "```\n" + message.content + replyInfo+"\n\n--------------------",
+            content: "```\n" + replyAuthorUsername + "\n " + messageStamp + "```\n" + message.content + replyInfo,
             files: message.attachments.map((a) => a.url),
         });
     });
 
-    try{
+    try {
         message.delete();
-    }catch(error){
-        console.error('Error deleting message:', error.message);
+    } catch(error){
+        console.error("Error deleting message:", error.message);
     }
 
 }
 
-client.login(token)
-app.get("*", (req, res) => {
-    res.send('<h1 style="color:blue;">Discord BOT is live</h1>');
-});
-
-app.listen(80, () => {
-    console.log("Server is running on port 80");
-});
+client.login(token);
