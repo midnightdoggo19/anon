@@ -13,22 +13,21 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/FiniteLoop-NMAMIT/stealth-bot.git"
+    "url": "git+https://github.com/midnightdoggo19/anon.git"
   },
   "keywords": [
     "discord",
     "bot"
   ],
-  "author": "Nidheesha T",
+  "author": "Midnight Doggo",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/FiniteLoop-NMAMIT/stealth-bot/issues"
+    "url": "https://github.com/midnightdoggo19/anon/issues"
   },
-  "homepage": "https://github.com/FiniteLoop-NMAMIT/stealth-bot#readme",
+  "homepage": "https://github.com/midnightdoggo19/anon#readme",
   "dependencies": {
     "discord.js": "^14.11.0",
-    "dotenv": "^16.1.4",
-    "express": "^4.18.2"
+    "dotenv": "^16.1.4"
   },
   "contributors": [
     {
