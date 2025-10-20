@@ -121,7 +121,8 @@ client.on('interactionCreate', async interaction => {
         });
     }
 
-    await interaction.editReply('Sent!');
+    // await interaction.editReply('Sent!');
+    await interaction.deleteReply();
 });
 
 client.login(token);
