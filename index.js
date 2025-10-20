@@ -13,6 +13,7 @@ const roleName = process.env.ROLE_NAME;
 const modChannelID = process.env.MOD_CHANNEL;
 const token = process.env.DISCORD_TOKEN;
 let inputChannelID = process.env.INPUT_CHANNEL; // cuz it can change
+const avatarToken = process.env.AVATAR_TOKEN || Math.random();
 
 if (!anonymousChannelID || !token) {
     console.log('Please set all required environment variables!');
@@ -50,8 +51,7 @@ const emojis = [
 ];
 
 function getAvatar (str) {
-    const d = new Date();
-    const hashPwd = crypto.createHash('sha1').update(str + d.getDate()).digest('hex');
+    const hashPwd = crypto.createHash('sha1').update(str + avatarToken).digest('hex');
     const i = parseInt('0x' + hashPwd) % emojis.length;
     return emojis[i];
 }
@@ -81,7 +81,7 @@ client.on(Events.MessageCreate, async (message) => {
             // .setColor('#117557ff')
             // .setTitle('Anonymous Message')
             
-            .setAuthor({ name: getAvatar(replyAuthorUsername) })
+            .setAuthor({ name: getAvatar(message.author.id) })
             .setDescription(String(message.content))
             // .addField('Stamp', messageStamp, true)
 
