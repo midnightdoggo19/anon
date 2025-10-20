@@ -119,12 +119,12 @@ client.on('interactionCreate', async interaction => {
         console.error(error);
     }
 
-    if(modChannel) {
+    if (modChannel) {
         logEmbed = new EmbedBuilder()
             // .setColor('#117557ff')
             // .setTitle('Anonymous Message')
             
-            .setAuthor({ name: interaction.user.username })
+            .setAuthor({name: "||" + interaction.user.username + "||"})
             .setDescription(String(theMessage))
             // .addField('Stamp', messageStamp, true)
 
