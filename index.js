@@ -15,7 +15,6 @@ const anonymousChannelID = process.env.ANONYMOUS_CHANNEL;
 // const roleName = process.env.ROLE_NAME;
 const modChannelID = process.env.MOD_CHANNEL;
 const token = process.env.DISCORD_TOKEN;
-// let inputChannelID = process.env.INPUT_CHANNEL; // cuz it can change
 const avatarToken = process.env.AVATAR_TOKEN || Math.random();
 
 const rest = new REST().setToken(token);
@@ -28,9 +27,7 @@ if (
 ) {
     console.log('Please set all required environment variables!');
     process.exit(1);
-} // if (!inputChannelID) {
-    // inputChannelID = anonymousChannelID // down here
-// }
+}
 
 let client = new Client({
     intents: [
@@ -49,7 +46,7 @@ let client = new Client({
 const commandSend = new SlashCommandBuilder()
 	.setName('send')
 	.setDescription('Anonymously send a message')
-	.addStringOption((option) => option.setName('message').setDescription('The message to send'));
+	.addStringOption((option) => option.setName('message').setDescription('The message to send').setRequired(true));
 
 const emojis = [
     '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯',
@@ -95,24 +92,16 @@ client.on('interactionCreate', async interaction => {
     let anonEmbed;
     let logEmbed;
 
-    // console.log(anonymousChannel);
-
     // if (roleName && interaction.user.roles.cache.some((role) => role.name === roleName)) return; // role blacklist
 
     try {
         anonEmbed = new EmbedBuilder()
-            // .setColor('#117557ff')
-            // .setTitle('Anonymous Message')
-            
+
             .setAuthor({ name: getAvatar(interaction.user.id) })
             .setDescription(String(theMessage))
-            // .addField('Stamp', messageStamp, true)
-
             .setTimestamp()
 
         anonymousChannel.send({
-            // content: '```\n' + getAvatar(replyAuthorUsername) + '\n ' + messageStamp + '```\n' + message.content,
-            // files: message.attachments.map((a) => a.url),
             embeds: [anonEmbed]
         });
     } catch (error) {
@@ -121,18 +110,13 @@ client.on('interactionCreate', async interaction => {
 
     if (modChannel) {
         logEmbed = new EmbedBuilder()
-            // .setColor('#117557ff')
-            // .setTitle('Anonymous Message')
-            
-            .setAuthor({name: "||" + interaction.user.username + "||"})
-            .setDescription(String(theMessage))
-            // .addField('Stamp', messageStamp, true)
+            // note: you can't do spoilers in the author field
 
+            .setDescription(String(theMessage))
+            .addFields({ name: 'Author', value: '||' + interaction.user.username + '||' })
             .setTimestamp()
 
         modChannel.send({
-            // content: '```\n' + replyAuthorUsername + '\n ' + messageStamp + '```\n' + message.content + replyInfo,
-            // files: message.attachments.map((a) => a.url),
             embeds: [logEmbed]
         });
     }
