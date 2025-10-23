@@ -92,7 +92,12 @@ client.on('interactionCreate', async interaction => {
     let anonEmbed;
     let logEmbed;
 
-    // if (roleName && interaction.user.roles.cache.some((role) => role.name === roleName)) return; // role blacklist
+    // if there is a role and you don't have it
+    if (process.env.ROLEID && !interaction.member.roles.cache.has(process.env.ROLEID)) {
+        await interaction.editReply(`You don\'t have the <@&${process.env.ROLEID}> role.`);
+
+        return;
+    }
 
     try {
         anonEmbed = new EmbedBuilder()
