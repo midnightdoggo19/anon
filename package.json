@@ -4,7 +4,8 @@
   "description": "Discord bot for anonymous chatting",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "test": "jest"
   },
   "engines": {
     "node": ">=16.9"
@@ -26,6 +27,10 @@
   "dependencies": {
     "discord.js": "^14.11.0",
     "dotenv": "^16.1.4"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "validate-npm-package-name": "^6.0.0"
   },
   "contributors": [
     {
