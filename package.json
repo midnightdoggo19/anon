@@ -26,7 +26,7 @@
   "homepage": "https://github.com/midnightdoggo19/anon#readme",
   "dependencies": {
     "discord.js": "^14.11.0",
-    "dotenv": "^16.1.4"
+    "dotenv": "^17.2.3"
   },
   "devDependencies": {
     "jest": "^29.7.0",
