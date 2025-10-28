@@ -78,7 +78,7 @@ const emojis = [
 })();
 
 function getAvatar (str) {
-    const hashPwd = crypto.createHash('sha1').update(str + avatarToken).digest('hex');
+    const hashPwd = crypto.createHash('sha1').update(str + process.env.GUILDID + avatarToken).digest('hex');
     const i = parseInt('0x' + hashPwd) % emojis.length;
     return emojis[i];
 }
