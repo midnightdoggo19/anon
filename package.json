@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "jest": "^29.7.0",
-    "validate-npm-package-name": "^6.0.0"
+    "validate-npm-package-name": "^7.0.0"
   },
   "contributors": [
     {
